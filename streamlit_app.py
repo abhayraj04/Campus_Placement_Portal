@@ -258,7 +258,7 @@ with st.sidebar:
         backend_status = "Not running locally"
         
     st.markdown(f"**Backend Server:** `{backend_status}`")
-    st.caption("GitHub: [abhayraj04/campusplacementinfo](https://github.com/abhayraj04/campusplacementinfo)")
+    st.caption("GitHub: [abhayraj04/Campus_Placement_Portal](https://github.com/abhayraj04/Campus_Placement_Portal)")
 
 
 # -------------------------------------------------------------
@@ -667,7 +667,7 @@ elif menu == "⚙️ System & Deployment":
         1. Push this repository to GitHub: `git push origin main`
         2. Visit **[share.streamlit.io](https://share.streamlit.io)**
         3. Click **New app** and select:
-           - **Repository:** `abhayraj04/campusplacementinfo`
+           - **Repository:** `abhayraj04/Campus_Placement_Portal`
            - **Branch:** `main`
            - **Main file path:** `streamlit_app.py`
         4. Click **Deploy!**

@@ -41,8 +41,8 @@ An enterprise-ready, dual-interface **Campus Placement Portal**:
 
 Clone the repository:
 ```bash
-git clone https://github.com/abhayraj04/campusplacementinfo.git
-cd campusplacementinfo
+git clone https://github.com/abhayraj04/Campus_Placement_Portal.git
+cd Campus_Placement_Portal
 ```
 
 Install Node.js dependencies:
@@ -105,7 +105,7 @@ Alternatively on Windows, you can double-click `start-app.bat` to launch both se
    ```
 2. Navigate to **[share.streamlit.io](https://share.streamlit.io)** and log in with GitHub.
 3. Click **New app** and configure:
-   - **Repository:** `abhayraj04/campusplacementinfo`
+   - **Repository:** `abhayraj04/Campus_Placement_Portal`
    - **Branch:** `main`
    - **Main file path:** `streamlit_app.py` (or `app.py`)
 4. *(Optional)* Under **Advanced settings**, set the `MONGO_URI` secret to your MongoDB Atlas connection string.
