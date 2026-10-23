@@ -21,7 +21,19 @@ exports.getUserProfile = async (req, res) => {
   try {
     const userId = getUserIdFromToken(req);
 
-    const user = await User.findById(userId).select("-password");
+    let user = null;
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState === 1) {
+      try {
+        user = await User.findById(userId).select("-password");
+      } catch (err) {
+        user = null;
+      }
+    }
+    if (!user) {
+      const { findUserById } = require("../utils/dbFallback");
+      user = findUserById(userId);
+    }
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

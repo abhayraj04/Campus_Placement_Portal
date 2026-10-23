@@ -84,6 +84,11 @@ exports.createJob = async (req, res) => {
 
 exports.getJobs = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const { getFallbackJobs } = require("../utils/dbFallback");
+      return res.status(200).json(getFallbackJobs());
+    }
     const query = req.user?.role === "student" ? { jobStatus: "approved" } : {};
     const cacheKey = req.user?.role === "student" ? JOBS_CACHE_KEY : null;
 
