@@ -43,14 +43,10 @@ const mongoOptions = {
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 let isConnecting = false;
+const LOCAL_MONGO_URI = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017/placement_portal";
+let activeMongoUri = process.env.MONGO_URI || LOCAL_MONGO_URI;
 
 const connectDB = async () => {
-  const MONGO_URI = process.env.MONGO_URI;
-  if (!MONGO_URI) {
-    console.log("MONGO_URI not found in .env file. Please create a valid .env with MONGO_URI=<your-connection-string>");
-    return;
-  }
-
   if (isConnecting) {
     return;
   }
@@ -61,14 +57,22 @@ const connectDB = async () => {
 
   isConnecting = true;
   try {
-    await mongoose.connect(MONGO_URI, mongoOptions);
-    reconnectAttempts = 0; // Reset on successful connection
+    await mongoose.connect(activeMongoUri, mongoOptions);
+    reconnectAttempts = 0;
     isConnecting = false;
   } catch (err) {
     isConnecting = false;
-    
+    console.error(`MongoDB Connection Error with URI [${activeMongoUri}]:`, err.message);
+
+    if (activeMongoUri !== LOCAL_MONGO_URI && (err.message.includes("ENOTFOUND") || err.name === "MongooseServerSelectionError")) {
+      console.log(`⚠️ Remote MongoDB unreachable. Falling back automatically to local MongoDB at: ${LOCAL_MONGO_URI}`);
+      activeMongoUri = LOCAL_MONGO_URI;
+      reconnectAttempts = 0;
+      setTimeout(connectDB, 1000);
+      return;
+    }
+
     reconnectAttempts++;
-    console.error("MongoDB Connection Error:", err.message);
     console.error("MongoDB Connection Details:", {
       serverSelectionTimeoutMS: mongoOptions.serverSelectionTimeoutMS,
       connectTimeoutMS: mongoOptions.connectTimeoutMS,
@@ -80,7 +84,7 @@ const connectDB = async () => {
       console.log(`Retrying in ${delayMs / 1000} seconds (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
       setTimeout(connectDB, delayMs);
     } else {
-      console.error("Max reconnection attempts reached. Please check your MongoDB Atlas connection.");
+      console.error("Max reconnection attempts reached. Please check your MongoDB connection.");
     }
   }
 };

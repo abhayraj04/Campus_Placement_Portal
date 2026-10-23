@@ -2429,7 +2429,7 @@
     padding: 22px !important;
   }
 }
-   PREMIUM DASHBOARD FEATURE STYLING
+/* PREMIUM DASHBOARD FEATURE STYLING
    Add this at the END of DashboardStyles.css
    ===================================================== */
 
@@ -2805,7 +2805,7 @@ button,
     width: 100% !important;
   }
 }
-   STUDENT PORTAL PREMIUM UI ENHANCEMENT
+/* STUDENT PORTAL PREMIUM UI ENHANCEMENT
    Add at END of DashboardStyles.css
    ========================================================= */
 
@@ -3180,7 +3180,7 @@ tr:hover {
     font-size: 2rem !important;
   }
 }
-   RESPONSIVE HAMBURGER SIDEBAR SYSTEM
+/* RESPONSIVE HAMBURGER SIDEBAR SYSTEM
    Add at END of DashboardStyles.css
    ========================================================= */
 
@@ -3644,9 +3644,6 @@ tr:hover {
   --premium-soft-shadow: 0 12px 35px rgba(15, 23, 42, 0.1);
   --premium-radius: 22px;
   --premium-transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-  box-sizing: border-box;
 }
 
 body {
