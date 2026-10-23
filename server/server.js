@@ -119,10 +119,13 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/profile", require("./routes/profileRoutes"));
 
 app.get("/api/health", (req, res) => {
-  const mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
-  res.status(mongoStatus === "Connected" ? 200 : 503).json({ 
-    status: mongoStatus === "Connected" ? "OK" : "Service Unavailable", 
-    message: `Backend is running. MongoDB: ${mongoStatus}` 
+  const isMongoConnected = mongoose.connection.readyState === 1;
+  const mongoStatus = isMongoConnected ? "Connected" : (mongoose.connection.readyState === 2 ? "Connecting" : "Disconnected");
+  res.status(200).json({ 
+    status: "OK", 
+    backend: "running",
+    mongodb: mongoStatus,
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -130,18 +133,18 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
-  try {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-  } catch (error) {
-    res.status(500).send('Server error');
+  const indexPath = path.join(__dirname, '../client/dist/index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
   }
+  next();
 });
 
 app.get("/", (req, res) => {
   res.send("Campus Placement Portal Backend Running");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

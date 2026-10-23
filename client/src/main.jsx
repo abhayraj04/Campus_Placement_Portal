@@ -35,7 +35,7 @@ const LoadingScreen = () => (
       `}</style>
     </div>
     <p>🔄 Connecting to Backend Server...</p>
-    <p style={{ fontSize: "14px", color: "#999" }}>This may take a moment</p>
+    <p style={{ fontSize: "14px", color: "#999" }}>Starting services. If hosted on Render free tier, server wake-up may take up to 45 seconds.</p>
   </div>
 );
 
@@ -67,9 +67,9 @@ waitForBackend(60, 1000).then(success => {
           Please ensure:
         </p>
         <ul style={{ textAlign: "left", display: "inline-block", color: "#999" }}>
-          <li>Backend server is running on http://localhost:5000</li>
+          <li>Backend service is running and accessible</li>
           <li>MongoDB connection is established</li>
-          <li>No firewall is blocking the connection</li>
+          <li>If on Render free tier, the service may still be waking up (click Retry below)</li>
         </ul>
         <button 
           onClick={() => window.location.reload()}

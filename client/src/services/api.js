@@ -44,9 +44,26 @@ const normalizeApiUrl = (url) => {
   return `${trimmed}${API_PATH}`;
 };
 
+const resolveDefaultApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  const isBrowser = typeof window !== 'undefined';
+  const isLocalhost = isBrowser && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === ''
+  );
+
+  // When deployed on production web (Render/Vercel), default to relative /api instead of localhost
+  if (!isLocalhost && (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+    return API_PATH;
+  }
+
+  return normalizeApiUrl(envUrl || API_PATH);
+};
+
 class APIConfig {
   constructor() {
-    this.apiUrl = normalizeApiUrl(import.meta.env.VITE_API_URL || API_PATH);
+    this.apiUrl = resolveDefaultApiUrl();
     this.backendAvailable = false;
     this.lastHealthCheck = null;
     this.healthCheckTimer = null;
@@ -56,11 +73,23 @@ class APIConfig {
 
   loadFromStorage() {
     try {
+      const isBrowser = typeof window !== 'undefined';
+      const isLocalhost = isBrowser && (
+        window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === ''
+      );
+
       const stored = localStorage.getItem(API_CONFIG_KEY);
       if (stored) {
         const config = JSON.parse(stored);
         if (config.apiUrl) {
-          this.apiUrl = normalizeApiUrl(config.apiUrl);
+          const candidate = normalizeApiUrl(config.apiUrl);
+          if (!isLocalhost && (candidate.includes('localhost') || candidate.includes('127.0.0.1'))) {
+            localStorage.removeItem(API_CONFIG_KEY);
+            return;
+          }
+          this.apiUrl = candidate;
         }
       }
     } catch (error) {
