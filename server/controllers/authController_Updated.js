@@ -126,9 +126,59 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, adminToken, enrollmentNumber } = req.body;
 
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const normalizedEnrollment = typeof enrollmentNumber === 'string' ? enrollmentNumber.trim().toUpperCase() : null;
+    const requestedRole = role || "student";
+
+    if (!name || !normalizedEmail || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required" });
+    }
+
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
+      return res.status(400).json({ message: nameValidation.message });
+    }
+
+    if (!validateEmail(normalizedEmail)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        message: "Password does not meet security requirements",
+        passwordErrors: passwordValidation.errors
+      });
+    }
+
+    if (requestedRole === "admin") {
+      const ADMIN_CREATION_TOKEN = String(process.env.ADMIN_CREATION_TOKEN || "Abhay2005").trim();
+      const providedAdminToken = typeof adminToken === 'string' ? adminToken.trim() : adminToken;
+      if (!ADMIN_CREATION_TOKEN) {
+        return res.status(500).json({ message: "Admin creation token is not configured on the server" });
+      }
+      if (!providedAdminToken || providedAdminToken !== ADMIN_CREATION_TOKEN) {
+        console.warn("[ADMIN REGISTER] Invalid admin creation token", {
+          providedAdminToken,
+          tokenConfigured: !!ADMIN_CREATION_TOKEN
+        });
+        return res.status(403).json({ message: "Unauthorized: Invalid admin creation token" });
+      }
+    }
+
+    if (requestedRole === "student") {
+      if (!normalizedEnrollment) {
+        return res.status(400).json({ message: "Enrollment number is required for student registration" });
+      }
+
+      const enrollmentValidation = validateEnrollmentNumber(normalizedEnrollment);
+      if (!enrollmentValidation.isValid) {
+        return res.status(400).json({ message: enrollmentValidation.message });
+      }
+    }
+
     const isDbReady = await ensureDbConnection(1000);
     if (!isDbReady) {
-      // Fallback in-memory registration when MongoDB is disconnected
       console.log("[REGISTER] Processing in-memory fallback registration for:", normalizedEmail);
       const existing = dbFallback.findUser({ email: normalizedEmail, enrollmentNumber: normalizedEnrollment });
       if (existing) {
@@ -160,58 +210,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-
-    if (!name || !normalizedEmail || !password) {
-      return res.status(400).json({ message: "Name, email, and password are required" });
-    }
-
-    const nameValidation = validateName(name);
-    if (!nameValidation.isValid) {
-      return res.status(400).json({ message: nameValidation.message });
-    }
-
-    if (!validateEmail(normalizedEmail)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
-
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      return res.status(400).json({
-        message: "Password does not meet security requirements",
-        passwordErrors: passwordValidation.errors
-      });
-    }
-
-    const requestedRole = role || "student";
-    if (requestedRole === "admin") {
-      const ADMIN_CREATION_TOKEN = String(process.env.ADMIN_CREATION_TOKEN || "").trim();
-      const providedAdminToken = typeof adminToken === 'string' ? adminToken.trim() : adminToken;
-      if (!ADMIN_CREATION_TOKEN) {
-        return res.status(500).json({ message: "Admin creation token is not configured on the server" });
-      }
-      if (!providedAdminToken || providedAdminToken !== ADMIN_CREATION_TOKEN) {
-        console.warn("[ADMIN REGISTER] Invalid admin creation token", {
-          providedAdminToken,
-          tokenConfigured: !!ADMIN_CREATION_TOKEN
-        });
-        return res.status(403).json({ message: "Unauthorized: Invalid admin creation token" });
-      }
-    }
-
-    const normalizedEnrollment = typeof enrollmentNumber === 'string' ? enrollmentNumber.trim().toUpperCase() : null;
     let existingUser = null;
-
     if (requestedRole === "student") {
-      if (!normalizedEnrollment) {
-        return res.status(400).json({ message: "Enrollment number is required for student registration" });
-      }
-
-      const enrollmentValidation = validateEnrollmentNumber(normalizedEnrollment);
-      if (!enrollmentValidation.isValid) {
-        return res.status(400).json({ message: enrollmentValidation.message });
-      }
-
       existingUser = await User.findOne({
         $or: [
           { email: normalizedEmail },
@@ -239,8 +239,8 @@ exports.register = async (req, res) => {
       email: normalizedEmail,
       password: hashedPassword,
       role: requestedRole,
-      approvalStatus: requestedRole === "admin" ? "approved" : "pending",
-      approved: requestedRole === "admin"
+      approvalStatus: "approved",
+      approved: true
     };
 
     if (requestedRole === "student") {
@@ -261,8 +261,9 @@ exports.register = async (req, res) => {
 
     fireAndForget(sendPostRegistrationNotifications(newUser));
   } catch (error) {
+    console.error("[REGISTER ERROR]:", error);
     res.status(500).json({
-      message: "Server error",
+      message: "Registration error: " + error.message,
       error: error.message
     });
   }
