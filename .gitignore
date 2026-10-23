@@ -1,8 +1,7 @@
-# Node dependencies and build
+# Node dependencies
 node_modules/
 client/node_modules/
 server/node_modules/
-client/dist/
 
 # Environment files and credentials
 .env
