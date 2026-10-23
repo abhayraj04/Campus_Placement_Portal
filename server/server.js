@@ -29,11 +29,20 @@ app.use(express.static(path.join(__dirname, '../client/dist'), {
   etag: true
 }));
 
+const isProduction = process.env.NODE_ENV === "production";
+const LOCAL_MONGO_URI = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017/placement_portal";
+let activeMongoUri = process.env.MONGO_URI || LOCAL_MONGO_URI;
+
+if (isProduction && !process.env.MONGO_URI) {
+  console.error("❌ CRITICAL: process.env.MONGO_URI is not set!");
+  console.error("Please add MONGO_URI in your Render Dashboard under Environment -> Environment Variables.");
+}
+
 const mongoOptions = {
-  serverSelectionTimeoutMS: 30000,
-  connectTimeoutMS: 30000,
+  serverSelectionTimeoutMS: 10000,
+  connectTimeoutMS: 10000,
   socketTimeoutMS: 45000,
-  minPoolSize: 5,
+  minPoolSize: 2,
   maxPoolSize: 10,
   maxIdleTimeMS: 600000,
   retryWrites: true,
@@ -43,17 +52,11 @@ const mongoOptions = {
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 let isConnecting = false;
-const LOCAL_MONGO_URI = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017/placement_portal";
-let activeMongoUri = process.env.MONGO_URI || LOCAL_MONGO_URI;
 
 const connectDB = async () => {
-  if (isConnecting) {
-    return;
-  }
-
-  if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) {
-    return;
-  }
+  if (isConnecting) return;
+  if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) return;
+  if (!activeMongoUri) return;
 
   isConnecting = true;
   try {
@@ -62,29 +65,30 @@ const connectDB = async () => {
     isConnecting = false;
   } catch (err) {
     isConnecting = false;
-    console.error(`MongoDB Connection Error with URI [${activeMongoUri}]:`, err.message);
+    console.error(`MongoDB Connection Error [${activeMongoUri}]:`, err.message);
 
-    if (activeMongoUri !== LOCAL_MONGO_URI && (err.message.includes("ENOTFOUND") || err.name === "MongooseServerSelectionError")) {
-      console.log(`⚠️ Remote MongoDB unreachable. Falling back automatically to local MongoDB at: ${LOCAL_MONGO_URI}`);
+    // Only fallback to local MongoDB if in local development
+    if (!isProduction && activeMongoUri !== LOCAL_MONGO_URI && (err.message.includes("ENOTFOUND") || err.name === "MongooseServerSelectionError")) {
+      console.log(`⚠️ Remote MongoDB unreachable. Falling back to local MongoDB at: ${LOCAL_MONGO_URI}`);
       activeMongoUri = LOCAL_MONGO_URI;
       reconnectAttempts = 0;
       setTimeout(connectDB, 1000);
       return;
     }
 
-    reconnectAttempts++;
-    console.error("MongoDB Connection Details:", {
-      serverSelectionTimeoutMS: mongoOptions.serverSelectionTimeoutMS,
-      connectTimeoutMS: mongoOptions.connectTimeoutMS,
-      reconnectAttempt: reconnectAttempts
-    });
+    if (isProduction) {
+      console.error("⚠️ In Production: Please ensure MongoDB Atlas Network Access has 0.0.0.0/0 (allow from anywhere) enabled.");
+    }
 
+    reconnectAttempts++;
     if (reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
       const delayMs = Math.min(5000 * reconnectAttempts, 30000);
-      console.log(`Retrying in ${delayMs / 1000} seconds (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+      console.log(`Retrying MongoDB connection in ${delayMs / 1000}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
       setTimeout(connectDB, delayMs);
     } else {
-      console.error("Max reconnection attempts reached. Please check your MongoDB connection.");
+      console.error("Max reconnection attempts reached. Retrying every 30 seconds...");
+      reconnectAttempts = 0;
+      setTimeout(connectDB, 30000);
     }
   }
 };
