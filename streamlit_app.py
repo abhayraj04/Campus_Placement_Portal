@@ -236,6 +236,7 @@ with st.sidebar:
         "Navigation Menu",
         [
             "📊 Placement Analytics",
+            "✨ AI Career Suite & ATS Scanner",
             "🤖 AI Chance Predictor",
             "🎓 Student Directory",
             "💼 Job Openings & Drives",
@@ -355,6 +356,108 @@ if menu == "📊 Placement Analytics":
             fig_skill.update_layout(yaxis=dict(autorange="reversed"), margin=dict(t=20, b=20, l=20, r=20))
             st.plotly_chart(fig_skill, use_container_width=True)
 
+
+
+# -------------------------------------------------------------
+# 1.5. ✨ AI Career Suite & ATS Scanner
+# -------------------------------------------------------------
+elif menu == "✨ AI Career Suite & ATS Scanner":
+    st.title("✨ AI Career Intelligence Suite")
+    st.markdown("Automated ATS Resume Evaluation, Company Mock Interview Simulator & Career Copilot.")
+
+    ai_tab1, ai_tab2, ai_tab3 = st.tabs(["📄 AI Resume & ATS Scanner", "🎙️ AI Mock Interview Coach", "💬 Ask PlacementBot"])
+
+    with ai_tab1:
+        st.subheader("ATS Resume Screening & Optimization")
+        c_role = st.selectbox("Target Position:", ["Full Stack Developer", "Frontend Developer", "Backend Developer", "Data Analyst", "Cloud & DevOps Engineer"])
+        sample_resume = "Aarav Sharma\nB.Tech Computer Science | CGPA 8.9\nSkills: Python, JavaScript, React, Node.js, MongoDB, Data Structures\nProjects:\n- Built full-stack placement portal with JWT auth and email alerts.\n- Developed real-time analytics dashboard with MongoDB Atlas."
+        r_text = st.text_area("Paste Resume Content / Project Summaries:", value=sample_resume, height=160)
+
+        if st.button("🚀 Analyze with AI ATS Scanner", use_container_width=True):
+            with st.spinner("Scanning keywords and metrics..."):
+                keywords_map = {
+                    "Full Stack Developer": ["react", "node.js", "mongodb", "javascript", "typescript", "express", "sql", "docker", "rest api"],
+                    "Frontend Developer": ["react", "javascript", "typescript", "html5", "css3", "tailwind", "redux", "next.js"],
+                    "Backend Developer": ["node.js", "express", "mongodb", "sql", "postgresql", "docker", "redis", "system design"],
+                    "Data Analyst": ["python", "sql", "pandas", "numpy", "power bi", "tableau", "excel", "machine learning"],
+                    "Cloud & DevOps Engineer": ["aws", "azure", "docker", "kubernetes", "ci/cd", "linux", "terraform"]
+                }
+                target_kws = keywords_map.get(c_role, keywords_map["Full Stack Developer"])
+                r_lower = r_text.lower()
+                matched = [k for k in target_kws if k in r_lower]
+                missing = [k for k in target_kws if k not in r_lower]
+
+                base_score = 45 + min(len(matched) * 6, 40)
+                if any(char.isdigit() for char in r_text):
+                    base_score += 10
+                final_ats = min(base_score, 96)
+
+                st.markdown("---")
+                rc1, rc2, rc3 = st.columns(3)
+                rc1.metric("ATS Compatibility Score", f"{final_ats}%")
+                rc2.metric("Matched Role Keywords", f"{len(matched)} / {len(target_kws)}")
+                rc3.metric("Missing Critical Keywords", f"{len(missing)}")
+
+                st.progress(final_ats / 100.0)
+
+                col_k1, col_k2 = st.columns(2)
+                with col_k1:
+                    st.success(f"**✓ Matched Keywords ({len(matched)}):**\n" + ", ".join([f"`{k}`" for k in matched]))
+                with col_k2:
+                    if missing:
+                        st.warning(f"**+ Recommended Keywords to Include ({len(missing)}):**\n" + ", ".join([f"`{k}`" for k in missing]))
+
+                st.info("**💡 Google XYZ Formula Rewrite Example:**\n\n**Before:** Worked on authentication and built login for users.\n\n**After:** *Engineered secure JWT-based multi-role authentication system, reducing unauthorized session dropouts by 40%.*")
+
+    with ai_tab2:
+        st.subheader("AI Mock Interview Question Simulator")
+        col_c, col_r = st.columns(2)
+        with col_c:
+            selected_comp = st.selectbox("Target Company:", ["Google", "Amazon", "Microsoft", "TCS / Infosys", "FinTech Startup"])
+        with col_r:
+            selected_level = st.selectbox("Experience Level:", ["Entry-Level / Campus Hire (0-1 yrs)", "Internship", "Associate Engineer"])
+
+        interview_questions = {
+            "Google": "Explain how you would find the longest substring without repeating characters in O(n) time. What data structures would you use?",
+            "Amazon": "Tell me about a time you showed strong Customer Obsession and made a difficult architectural trade-off to deliver on time.",
+            "Microsoft": "How do you handle memory management and avoid leaks in Node.js / JavaScript applications?",
+            "TCS / Infosys": "Explain the 4 pillars of Object-Oriented Programming (OOP) and give a real-world software design example.",
+            "FinTech Startup": "How would you design an idempotent payment processing API to prevent duplicate transactions?"
+        }
+
+        q = interview_questions.get(selected_comp, interview_questions["Google"])
+        st.markdown(f"**Interview Question [{selected_comp} - {selected_level}]:**")
+        st.info(f"🎙️ **{q}**")
+
+        student_ans = st.text_area("Your Structured Answer:", placeholder="Provide your step-by-step logic, complexity analysis, or STAR format response...", height=120)
+
+        if st.button("Evaluate Answer with AI", key="eval_interview"):
+            if not student_ans.strip():
+                st.warning("Please type an answer before evaluating.")
+            else:
+                words = len(student_ans.split())
+                ev_score = min(max(5 + (2 if words >= 30 else 0) + (2 if any(term in student_ans.lower() for term in ["complexity", "time", "space", "star", "result", "cache"]) else 0), 4), 10)
+                st.success(f"### Score: {ev_score} / 10")
+                if ev_score >= 8:
+                    st.write("🌟 **Strengths:** Excellent depth, clear technical terminology, and mature structured breakdown.")
+                else:
+                    st.write("💡 **Feedback:** Solid foundation! For top product firms, ensure you state time/space complexity explicitly and discuss edge cases.")
+
+    with ai_tab3:
+        st.subheader("💬 Ask PlacementBot")
+        st.markdown("Get instant AI guidance on technical roadmaps, aptitude shortcuts, and interview behavioral rounds.")
+        user_prompt = st.text_input("Ask a question:", placeholder="e.g. How should I prepare for Amazon Leadership Principles?")
+        if st.button("Send to PlacementBot", key="send_bot"):
+            if user_prompt:
+                p_lower = user_prompt.lower()
+                if "amazon" in p_lower:
+                    st.write("📦 **Amazon Strategy:** Prepare 2 STAR format stories for every major Leadership Principle (Customer Obsession, Ownership, Bias for Action). 50% of the interview weight is behavioral!")
+                elif "resume" in p_lower or "ats" in p_lower:
+                    st.write("📄 **Resume Tips:** Keep it to 1 page, clean single-column format, standard section headings, and quantify your achievements using metrics and percentages.")
+                elif "dsa" in p_lower or "leetcode" in p_lower:
+                    st.write("💡 **DSA Roadmap:** Prioritize Arrays & HashMaps, then Linked Lists, Two Pointers, Trees (BST/DFS/BFS), and common DP patterns (0/1 Knapsack, LCS).")
+                else:
+                    st.write("🎓 **Placement Guidance:** Practice daily coding, build 2 production-quality full-stack projects with live deployment links, and take mock interviews under timed conditions!")
 
 # -------------------------------------------------------------
 # 2. AI Placement Chance Predictor

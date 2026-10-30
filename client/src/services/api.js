@@ -483,3 +483,43 @@ export const getProfileCompletion = async () => {
     cacheTTL: 15000
   });
 };
+
+
+// ==========================================
+// AI Placement & Career Intelligence Services
+// ==========================================
+
+export const aiChat = async ({ message, context, role }) => {
+  return request("/ai/chat", {
+    method: "POST",
+    data: { message, context, role }
+  });
+};
+
+export const aiAnalyzeResume = async ({ resumeText, targetRole, skills }) => {
+  return request("/ai/resume-analyzer", {
+    method: "POST",
+    data: { resumeText, targetRole, skills }
+  });
+};
+
+export const aiGenerateInterview = async ({ role, company, difficulty }) => {
+  return request("/ai/interview-prep", {
+    method: "POST",
+    data: { role, company, difficulty }
+  });
+};
+
+export const aiEvaluateInterview = async ({ question, answer, category }) => {
+  return request("/ai/interview-evaluate", {
+    method: "POST",
+    data: { question, answer, category }
+  });
+};
+
+export const aiJobMatch = async ({ candidateSkills, jobSkills, jobTitle }) => {
+  return request("/ai/job-match", {
+    method: "POST",
+    data: { candidateSkills, jobSkills, jobTitle }
+  });
+};

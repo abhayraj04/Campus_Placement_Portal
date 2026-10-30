@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
 import Sidebar from "../../components/Sidebar";
 import ThemeToggleButton from "../../components/ThemeToggleButton";
-import { request, getUserProfile, getApiUrl } from "../../services/api"; // Re-exported from api.js and axios wrapper
+import { request, getUserProfile, getApiUrl } from "../../services/api";
+import AIHubSection from "./AIHubSection"; // Re-exported from api.js and axios wrapper
 import "./DashboardStyles.css";
 import "./DarkTheme.css";
 import "./LightTheme.css";
@@ -683,6 +684,7 @@ function StudentDashboard() {
 
   const sidebarLinks = [
     { id: "dashboard", label: "Dashboard", icon: "📊", action: () => handleSectionChange("dashboard") },
+    { id: "ai", label: "✨ AI Career Suite", icon: "🤖", action: () => handleSectionChange("ai") },
     { id: "jobs", label: "Available Jobs", icon: "🔍", action: () => handleSectionChange("jobs") },
     { id: "applications", label: "My Applications", icon: "📋", action: () => handleSectionChange("applications") },
     { id: "mock", label: "Mock Tests", icon: "📝", action: () => handleSectionChange("mock") },
@@ -693,6 +695,7 @@ function StudentDashboard() {
   ];
 
   const dashboardMenuItems = [
+    { id: "ai", label: "✨ AI Career Suite", icon: "🤖" },
     { id: "jobs", label: "Available Jobs", icon: "🔍" },
     { id: "applications", label: "My Applications", icon: "📋" },
     { id: "mock", label: "Mock Tests", icon: "📝" },
@@ -817,7 +820,11 @@ function StudentDashboard() {
             <div className="stat-label">Offers Received</div>
           </div>
         </div>
-{activeSection === "dashboard" && (
+{activeSection === "ai" && (
+          <AIHubSection profile={profile} jobs={jobs} />
+        )}
+
+        {activeSection === "dashboard" && (
   <div className="content-section">
     <div className="section-content">
       <h2>Student Dashboard Overview</h2>

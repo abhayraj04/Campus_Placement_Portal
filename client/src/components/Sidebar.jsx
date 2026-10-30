@@ -14,6 +14,7 @@ function Sidebar({ links = [], closeSidebar, activeItem }) {
     { label: "Dashboard", action: () => navigate(`/${role}/dashboard`) },
     ...(role === "student"
       ? [
+          { label: "✨ AI Career Suite", action: () => navigate(`/${role}/dashboard?section=ai`) },
           { label: "Available Jobs", action: () => navigate(`/${role}/dashboard?section=jobs`) },
           { label: "My Applications", action: () => navigate(`/${role}/dashboard?section=applications`) },
           { label: "Mock Tests", action: () => navigate(`/${role}/dashboard?section=mock`) },

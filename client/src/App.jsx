@@ -14,6 +14,7 @@ const CompanyDashboard = lazy(() => import("./pages/dashboards/CompanyDashboard"
 const AuthenticatedHome = lazy(() => import("./pages/AuthenticatedHome"));
 
 import ConnectionStatus from "./components/ConnectionStatus";
+import AICareerCopilot from "./components/AICareerCopilot";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, hasRole, loading } = useAuth();
@@ -94,6 +95,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <ConnectionStatus />
+          <AICareerCopilot />
           <Suspense fallback={<div className="loading-spinner">Loading…</div>}>
             <AppRoutes />
           </Suspense>

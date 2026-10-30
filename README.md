@@ -9,6 +9,11 @@
 An enterprise-ready, dual-interface **Campus Placement Portal**:
 1. **Interactive Streamlit Web Application** (`streamlit_app.py` / `app.py`) — Data-driven placement analytics, candidate talent pool, active campus drive eligibility checker, and AI-powered placement chance & salary predictor. Ready for **1-click deployment on Streamlit Community Cloud**.
 2. **Full-Stack MERN Portal** (`client/` & `server/`) — Role-based web portal with separate dashboards for Students, Recruiters/Companies, and College Administrators, with automated email notifications, mock test arena, and resume profile management.
+3. **✨ AI Career Suite & Placement Copilot** — Powered by Gemini AI with smart heuristic fallbacks:
+   - 📄 **ATS Resume & Profile Optimizer:** Instant ATS score, missing keywords detection, and Google XYZ-formula resume bullet rewrites.
+   - 🎙️ **AI Mock Interview Coach:** Dynamic role-tailored questions (Google, Microsoft, Amazon, FinTech, Startups) with live answer evaluation and scoring (1-10).
+   - 🎯 **AI Job Compatibility Matcher:** Detailed skill gap analysis and 4-week tailored preparation roadmap.
+   - 🤖 **Floating PlacementBot Copilot:** Real-time conversational assistant for student guidance and career strategy across the entire portal.
 
 ---
 
@@ -122,17 +127,20 @@ Alternatively on Windows, you can double-click `start-app.bat` to launch both se
 
 ---
 
-### 3. Deploying Backend to Render
-1. Create a new **Web Service** on [Render](https://render.com).
-2. Set:
-   - **Root Directory:** `server`
-   - **Build Command:** `npm install`
-   - **Start Command:** `node server.js`
+### 3. Deploying to Render (Unified Full-Stack Web Service)
+This repository includes a pre-configured build pipeline that compiles the React client and serves both API and frontend from a single Render Web Service:
+
+1. Create a new **Web Service** on [Render](https://render.com) connected to your GitHub repo `Campus_Placement_Portal`.
+2. Configure Settings:
+   - **Environment:** `Node`
+   - **Build Command:** `npm run render-build`
+   - **Start Command:** `npm start`
 3. Add Environment Variables:
-   - `MONGO_URI`: Your MongoDB Atlas URI
-   - `JWT_SECRET`: Random secure string
-   - `CLIENT_URL`: Your Vercel frontend URL
-   - `ADMIN_CREATION_TOKEN`: Your secret admin token
+   - `MONGO_URI`: Your MongoDB Atlas URI (ensure `0.0.0.0/0` is whitelisted in Atlas Network Access)
+   - `JWT_SECRET`: Any secure random string
+   - `NODE_ENV`: `production`
+   - `GEMINI_API_KEY`: *(Optional)* Your Google Gemini API Key for deep AI reasoning (portal includes built-in placement heuristic engine if omitted)
+   - `ADMIN_CREATION_TOKEN`: Your admin creation token
 
 ---
 
@@ -165,3 +173,4 @@ Campus-Placement-Portal/
 
 ## 🛡️ License
 Distributed under the MIT License. See `LICENSE` for more information.
+
